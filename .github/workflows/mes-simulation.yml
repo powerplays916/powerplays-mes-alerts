@@ -10,14 +10,20 @@ jobs:
   simulate:
     runs-on: ubuntu-latest
     timeout-minutes: 2
+
     steps:
       - name: Run MES simulation
         env:
           POSTING_API_KEY: ${{ secrets.POSTING_API_KEY }}
+          VERCEL_BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
+          set -euo pipefail
+
           curl --fail-with-body --silent --show-error \
             --max-time 45 \
+            --retry 2 \
+            --retry-delay 3 \
             -X POST \
             "https://powerplays-discord-alerts-m7d5imxd9-power-plays.vercel.app/api/simulation-cycle" \
-            -H "Authorization: Bearer $POSTING_API_KEY"
-
+            -H "Authorization: Bearer $POSTING_API_KEY" \
+            -H "x-vercel-protection-bypass: $VERCEL_BYPASS"
